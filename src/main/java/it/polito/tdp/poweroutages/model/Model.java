@@ -23,6 +23,7 @@ public class Model {
 	private List<Nerc> allNerc;
 	private Map<Integer, Nerc> mappa;
 	private List<Collegamento> collegamenti;
+	private List<Collegamento> relazioni;
 	
 	public Model() {
 		this.dao = new PowerOutagesDAO();
@@ -48,9 +49,15 @@ public class Model {
 		
 		//ARCHI
 		this.collegamenti = new ArrayList<>(this.dao.prendiCollegamenti(this.mappa));
+		this.relazioni = new ArrayList<>(this.dao.prendiRelazioni(mappa));
 		
 		for(Collegamento c: this.collegamenti) {
 			Graphs.addEdge(this.grafo, c.getNerc1(), c.getNerc2(), c.getPeso());
+		}
+		for(Collegamento c: this.relazioni) {
+			if(!this.grafo.containsEdge(c.getNerc1(), c.getNerc2())) {
+				Graphs.addEdge(this.grafo, c.getNerc1(), c.getNerc2(), c.getPeso());
+			}
 		}
 		
 	}
@@ -83,7 +90,11 @@ public class Model {
 		
 		String stampa = "";
 		for(Collegamento c: col) {
-			stampa += c.toString()+"\n";
+			if(c.getNerc1().getValue().equals(nerc)) {
+				stampa += c.getNerc2()+", peso: "+c.getPeso()+" \n";
+			}else if(c.getNerc2().getValue().equals(nerc))
+				stampa += c.getNerc1()+", peso: "+c.getPeso()+" \n";
+			
 		}
 		return stampa;
 	}

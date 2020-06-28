@@ -99,4 +99,35 @@ public class PowerOutagesDAO {
 		return lista;
 		
 	}
+	
+	public List<Collegamento> prendiRelazioni(Map<Integer, Nerc> mappa){
+		String sql = "SELECT n.nerc_one onee, n.nerc_two two\r\n" + 
+				" FROM nercrelations n";
+		List<Collegamento> lista = new ArrayList<>();
+		
+		try {
+			Connection con = DBConnect.getConnection();
+			PreparedStatement st = con.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			
+			while(res.next()) {
+				if(mappa.containsKey(res.getInt("onee")) && mappa.containsKey(res.getInt("two"))) {
+					Nerc n1 = mappa.get(res.getInt("onee"));
+					Nerc n2 = mappa.get(res.getInt("two"));
+					
+					Collegamento col = new Collegamento(n1, n2, 0);
+					
+					lista.add(col);
+				}
+			}
+			
+			con.close();
+			
+		}catch (SQLException e) {
+			throw new RuntimeException("ERRORE DB: impossibile prendere i dati relativi ai due nerc passati.",e);
+		}
+
+		return lista;
+		
+	}
 }
